@@ -1,103 +1,105 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { UserForm } from "@/components/user-form"
-import { PostForm } from "@/components/post-form"
-import { UsersTable } from "@/components/users-table"
-import { Button } from "@/components/ui/button"
-import { RefreshCw } from "lucide-react"
+import { useState, useEffect } from "react";
+import { UserForm } from "@/components/user-form";
+import { PostForm } from "@/components/post-form";
+import { UsersTable } from "@/components/users-table";
+import { Button } from "@/components/ui/button";
+import { RefreshCw } from "lucide-react";
 
 interface User {
-  id: number
-  name: string | null
-  email: string
-  posts: Post[]
+  id: number;
+  name: string | null;
+  email: string;
+  posts: Post[];
 }
 
 interface Post {
-  id: number
-  title: string
-  content: string | null
-  published: boolean
-  authorId: number
+  id: number;
+  title: string;
+  content: string | null;
+  published: boolean;
+  authorId: number;
 }
 
 export default function Home() {
-  const [users, setUsers] = useState<User[]>([])
-  const [loading, setLoading] = useState(true)
-  const [editingUser, setEditingUser] = useState<User | null>(null)
-  const [editingPost, setEditingPost] = useState<Post | null>(null)
+  const [users, setUsers] = useState<User[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [editingUser, setEditingUser] = useState<User | null>(null);
+  const [editingPost, setEditingPost] = useState<Post | null>(null);
 
   const fetchUsers = async () => {
     try {
-      setLoading(true)
-      const response = await fetch("/api/users")
+      setLoading(true);
+      const response = await fetch("/api/users");
       if (response.ok) {
-        const data = await response.json()
-        setUsers(data)
+        const data = await response.json();
+        setUsers(data);
       }
     } catch (error) {
-      console.error("Failed to fetch users:", error)
+      console.error("Failed to fetch users:", error);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   useEffect(() => {
-    fetchUsers()
-  }, [])
+    fetchUsers();
+  }, []);
 
   const handleUserSaved = () => {
-    setEditingUser(null)
-    fetchUsers()
-  }
+    setEditingUser(null);
+    fetchUsers();
+  };
 
   const handlePostSaved = () => {
-    setEditingPost(null)
-    fetchUsers()
-  }
+    setEditingPost(null);
+    fetchUsers();
+  };
 
   const handleDeleteUser = async (userId: number) => {
-    if (!confirm("Are you sure you want to delete this user and all their posts?")) {
-      return
+    if (
+      !confirm("Are you sure you want to delete this user and all their posts?")
+    ) {
+      return;
     }
 
     try {
       const response = await fetch(`/api/users/${userId}`, {
         method: "DELETE",
-      })
+      });
 
       if (response.ok) {
-        fetchUsers()
+        fetchUsers();
       } else {
-        const errorData = await response.json()
-        alert(errorData.error || "Failed to delete user")
+        const errorData = await response.json();
+        alert(errorData.error || "Failed to delete user");
       }
     } catch (error) {
-      alert("Failed to delete user")
+      alert("Failed to delete user");
     }
-  }
+  };
 
   const handleDeletePost = async (postId: number) => {
     if (!confirm("Are you sure you want to delete this post?")) {
-      return
+      return;
     }
 
     try {
       const response = await fetch(`/api/posts/${postId}`, {
         method: "DELETE",
-      })
+      });
 
       if (response.ok) {
-        fetchUsers()
+        fetchUsers();
       } else {
-        const errorData = await response.json()
-        alert(errorData.error || "Failed to delete post")
+        const errorData = await response.json();
+        alert(errorData.error || "Failed to delete post");
       }
     } catch (error) {
-      alert("Failed to delete post")
+      alert("Failed to delete post");
     }
-  }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 p-4">
@@ -106,11 +108,15 @@ export default function Home() {
           <div className="flex items-center justify-between">
             <h1 className="text-3xl font-bold">User & Post Management</h1>
             <Button onClick={fetchUsers} disabled={loading}>
-              <RefreshCw className={`h-4 w-4 mr-2 ${loading ? "animate-spin" : ""}`} />
+              <RefreshCw
+                className={`h-4 w-4 mr-2 ${loading ? "animate-spin" : ""}`}
+              />
               Refresh
             </Button>
           </div>
-          <p className="text-muted-foreground mt-2">Manage users and their posts with full CRUD operations</p>
+          <p className="text-muted-foreground mt-2">
+            Manage users and their posts with full CRUD operations
+          </p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -148,5 +154,5 @@ export default function Home() {
         </div>
       </div>
     </div>
-  )
+  );
 }

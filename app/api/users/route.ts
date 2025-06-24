@@ -1,79 +1,32 @@
-import { type NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+// app/api/users/route.ts
+import prisma from "@/lib/prisma";
+import { NextResponse } from "next/server";
 
 export async function GET() {
   try {
-    console.log("Fetching users...");
-    console.log("DATABASE_URL exists:", !!process.env.DATABASE_URL);
-
-    const users = await prisma.user.findMany({
-      include: {
-        posts: true,
-      },
-      orderBy: {
-        id: "desc",
-      },
-    });
-
-    console.log("Users fetched:", users.length);
+    const users = await prisma.user.findMany({ include: { posts: true } });
     return NextResponse.json(users);
   } catch (error: any) {
-    console.error("Error fetching users:", error);
     return NextResponse.json(
-      {
-        error: "Failed to fetch users",
-        details: error.message,
-        code: error.code,
-      },
+      { error: "Failed to fetch users", details: error.message },
       { status: 500 }
     );
   }
 }
 
-export async function POST(request: NextRequest) {
+export async function POST(req: Request) {
   try {
-    console.log("Creating user...");
-    const body = await request.json();
-    const { name, email } = body;
-
-    console.log("User data:", { name, email });
-
-    if (!email) {
-      return NextResponse.json({ error: "Email is required" }, { status: 400 });
-    }
-
-    // Test connection first
-    await prisma.$connect();
-    console.log("Database connected");
-
+    const body = await req.json();
     const user = await prisma.user.create({
       data: {
-        name,
-        email,
-      },
-      include: {
-        posts: true,
+        email: body.email,
+        name: body.name,
       },
     });
-
-    console.log("User created:", user);
-    return NextResponse.json(user, { status: 201 });
+    return NextResponse.json(user);
   } catch (error: any) {
-    console.error("Error creating user:", error);
-
-    if (error.code === "P2002") {
-      return NextResponse.json(
-        { error: "Email already exists" },
-        { status: 400 }
-      );
-    }
-
     return NextResponse.json(
-      {
-        error: "Failed to create user",
-        details: error.message,
-        code: error.code,
-      },
+      { error: "Failed to create user", details: error.message },
       { status: 500 }
     );
   }

@@ -1,5 +1,5 @@
-import { type NextRequest, NextResponse } from "next/server"
-import { prisma } from "@/lib/prisma"
+import { type NextRequest, NextResponse } from "next/server";
+import prisma from "@/lib/prisma";
 
 export async function GET() {
   try {
@@ -10,20 +10,26 @@ export async function GET() {
       orderBy: {
         id: "desc",
       },
-    })
-    return NextResponse.json(posts)
+    });
+    return NextResponse.json(posts);
   } catch (error) {
-    return NextResponse.json({ error: "Failed to fetch posts" }, { status: 500 })
+    return NextResponse.json(
+      { error: "Failed to fetch posts" },
+      { status: 500 }
+    );
   }
 }
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json()
-    const { title, content, published, authorId } = body
+    const body = await request.json();
+    const { title, content, published, authorId } = body;
 
     if (!title || !authorId) {
-      return NextResponse.json({ error: "Title and authorId are required" }, { status: 400 })
+      return NextResponse.json(
+        { error: "Title and authorId are required" },
+        { status: 400 }
+      );
     }
 
     const post = await prisma.post.create({
@@ -36,13 +42,16 @@ export async function POST(request: NextRequest) {
       include: {
         author: true,
       },
-    })
+    });
 
-    return NextResponse.json(post, { status: 201 })
+    return NextResponse.json(post, { status: 201 });
   } catch (error: any) {
     if (error.code === "P2003") {
-      return NextResponse.json({ error: "User not found" }, { status: 400 })
+      return NextResponse.json({ error: "User not found" }, { status: 400 });
     }
-    return NextResponse.json({ error: "Failed to create post" }, { status: 500 })
+    return NextResponse.json(
+      { error: "Failed to create post" },
+      { status: 500 }
+    );
   }
 }
